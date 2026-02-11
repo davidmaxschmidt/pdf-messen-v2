@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+  <title>PDF Messen – Strecken</title>
+  <style>
+    :root { --bg:#0b0c10; --panel:#14161c; --text:#e9eef5; --muted:#aab3c2; --btn:#2a2f3a; --btn2:#3a4151; --accent:#ffd400; }
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;}
+    .topbar{
+      position:sticky;top:0;z-index:10;
+      display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;
+      padding:.6rem .8rem;background:linear-gradient(180deg, rgba(20,22,28,.98), rgba(20,22,28,.86));
+      border-bottom:1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(10px);
+    }
+    .chip{font-size:.9rem;color:var(--muted);padding:.35rem .55rem;border:1px solid rgba(255,255,255,.12);border-radius:999px;}
+    .btn{
+      appearance:none;border:1px solid rgba(255,255,255,.12);
+      background:var(--btn);color:var(--text);
+      padding:.55rem .75rem;border-radius:.7rem;font-weight:600;
+    }
+    .btn:hover{background:var(--btn2);cursor:pointer}
+    .btn.accent{background:var(--accent);border-color:rgba(0,0,0,.2);color:#111;font-weight:800}
+    select,input[type="text"]{
+      background:var(--panel);color:var(--text);
+      border:1px solid rgba(255,255,255,.12);
+      padding:.55rem .6rem;border-radius:.7rem;
+    }
+    .wrap{display:flex;justify-content:center;padding:1rem;}
+    .viewer{
+      width:min(1100px, 98vw);
+      background:var(--panel);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:1rem;
+      padding:1rem;
+      box-shadow:0 12px 40px rgba(0,0,0,.35);
+    }
+    .stage{
+      position:relative;
+      width:100%;
+      display:flex;
+      justify-content:center;
+      overflow:auto;
+      border-radius:1rem;
+      background:#0e1016;
+      border:1px solid rgba(255,255,255,.08);
+    }
+    canvas{display:block;}
+    #pdfCanvas{background:#111;}
+    #overlayCanvas{position:absolute;left:0;top:0;touch-action:none;}
+    .status{padding:.4rem .1rem;color:var(--muted);font-size:.92rem;display:flex;gap:.6rem;flex-wrap:wrap}
+    .hint{color:var(--muted);font-size:.9rem;margin-top:.5rem;line-height:1.35}
+    .error{color:#ff8b8b}
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <button class="btn" id="btnPrev">◀︎</button>
+    <button class="btn" id="btnNext">▶︎</button>
+
+    <span class="chip" id="pageInfo">Seite – / –</span>
+    <span class="chip" id="sheetInfo">Blatt: –</span>
+
+    <label class="chip" style="display:flex;gap:.45rem;align-items:center;">
+      Maßstab
+      <select id="scaleSelect">
+        <option value="25">1:25</option>
+        <option value="50">1:50</option>
+        <option value="100">1:100</option>
+        <option value="150">1:150</option>
+        <option value="200">1:200</option>
+        <option value="250" selected>1:250</option>
+        <option value="500">1:500</option>
+        <option value="1000">1:1000</option>
+        <option value="2000">1:2000</option>
+      </select>
+    </label>
+
+    <button class="btn" id="btnLine">Strecke messen</button>
+    <button class="btn" id="btnUndo">Undo</button>
+    <button class="btn" id="btnClear">Clear</button>
+
+    <button class="btn accent" id="btnExport">Export PDF</button>
+
+    <label class="btn" style="display:inline-flex;gap:.5rem;align-items:center;">
+      PDF wählen
+      <input id="fileInput" type="file" accept="application/pdf" style="display:none;">
+    </label>
+
+    <span class="chip" id="autoScaleInfo">Auto-Maßstab: –</span>
+  </div>
+
+  <div class="wrap">
+    <div class="viewer">
+      <div class="stage" id="stage">
+        <canvas id="pdfCanvas"></canvas>
+        <canvas id="overlayCanvas"></canvas>
+      </div>
+
+      <div class="status" id="status"></div>
+      <div class="hint">
+        Bedienung: <b>Strecke messen</b> → 1. Tap/Klick Startpunkt → 2. Tap/Klick Endpunkt.<br>
+        Ohne Kalibrieren: Blattgröße wird erkannt, Standard-Maßstab ist <b>1:250</b> (umschaltbar).<br>
+        Tipp: Wenn du eine SharePoint-URL mitgibst, nutze <code>?file=</code> (z. B. GitHub Pages URL + <code>?file=...</code>).
+      </div>
+      <div class="hint error" id="errorBox" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- PDF.js (UMD) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.js"></script>
+  <!-- pdf-lib -->
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+
+  <script src="./app.js"></script>
+</body>
+</html>
